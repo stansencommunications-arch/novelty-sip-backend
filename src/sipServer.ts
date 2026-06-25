@@ -41,8 +41,7 @@ export class SIPServer {
         uri: new URI("sip", this.sipUsername, this.yeasterDomain),
         authorizationPassword: this.sipPassword,
         displayName: "Novelty Call Center",
-        register: false
-      };
+        };
 
       this.userAgent = new UserAgent(options);
 
