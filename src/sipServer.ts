@@ -34,7 +34,6 @@ export class SIPServer {
       const wsURL = `wss://yeaster:${this.yeasterPort}/ws`;
 
       const options: UserAgentOptions = {
-        loggerFactory: undefined, // Disable logging for production
         transportOptions: {
           wsServers: [wsURL],
           traceSip: false
@@ -151,4 +150,3 @@ export class SIPServer {
     }
   }
 }
-
