@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "novelty-sip-backend",
   "version": "1.0.0",
   "description": "Novelty Call Center SIP Backend",
