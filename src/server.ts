@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
-import { SIPServer } from "./sipServer";
+import { SIPServer } from "./sipServer.js";
 
 dotenv.config();
 
