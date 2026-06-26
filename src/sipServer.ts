@@ -1,13 +1,3 @@
-import WebSocket from 'ws';
-
-// Declare WebSocket on global scope to satisfy TypeScript strict mode
-declare global {
-  var WebSocket: any;
-}
-
-// Set the polyfill BEFORE importing sip.js
-globalThis.WebSocket = WebSocket;
-
 import {
   UserAgent,
   type UserAgentOptions,
@@ -60,7 +50,8 @@ export class SIPServer extends EventEmitter {
   private stopped = false;
 
   constructor(
-    private wsUrl: string,
+    private sipServer: string,
+    private sipPort: number,
     private sipUsername: string,
     private sipPassword: string,
     private yeasterDomain: string,
@@ -78,14 +69,14 @@ export class SIPServer extends EventEmitter {
     }
 
     const aor = `sip:${this.sipUsername}@${this.yeasterDomain}`;
-    console.log(`[SIP] Connecting  AOR=${aor}  WS=${this.wsUrl}`);
+    console.log(`[SIP] Connecting via TCP  AOR=${aor}  Server=${this.sipServer}:${this.sipPort}`);
 
     const options: UserAgentOptions = {
       uri: UserAgent.makeURI(aor) ?? undefined,
       transportOptions: {
-        server: this.wsUrl,
-        // Pass the ws package constructor explicitly so sip.js works in Node.js
-        WebSocketConstructor: WebSocket as unknown as typeof globalThis.WebSocket,
+        // Use standard SIP TCP transport (not WebSocket)
+        servers: [`sip:${this.sipServer}:${this.sipPort};transport=tcp`],
+        traceSip: false,
       },
       authorizationUsername: this.sipUsername,
       authorizationPassword: this.sipPassword,
@@ -203,7 +194,6 @@ export class SIPServer extends EventEmitter {
     console.log(`[Call ${callId}] Ending (state=${session.inviter.state})`);
     try {
       if (session.inviter.state === SessionState.Established) {
-        // Session.bye() is on the base class; cast through unknown to reach it safely
         await (session.inviter as unknown as { bye: () => Promise<void> }).bye();
       } else if (
         session.inviter.state === SessionState.Establishing ||
