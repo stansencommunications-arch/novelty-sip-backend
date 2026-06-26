@@ -1,7 +1,7 @@
-// Import ws WebSocket before sip.js so we can pass it explicitly via transportOptions.
-// DO NOT rely on a globalThis polyfill — sip.js captures the WebSocket constructor
-// at module-load time, before any polyfill would run in Node.js.
+// CommonJS output: require() calls run in source order, so this assignment
+// executes before sip.js is required — which is what makes the polyfill safe here.
 import WebSocket from 'ws';
+(globalThis as unknown as Record<string, unknown>).WebSocket = WebSocket;
 
 import {
   UserAgent,
