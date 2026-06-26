@@ -1,5 +1,3 @@
-// CommonJS output: require() calls run in source order, so this assignment
-// executes before sip.js is required — which is what makes the polyfill safe here.
 import WebSocket from 'ws';
 
 // Declare WebSocket on global scope to satisfy TypeScript strict mode
@@ -7,7 +5,7 @@ declare global {
   var WebSocket: any;
 }
 
-// Set the polyfill
+// Set the polyfill BEFORE importing sip.js
 globalThis.WebSocket = WebSocket;
 
 import {
@@ -86,8 +84,7 @@ export class SIPServer extends EventEmitter {
       uri: UserAgent.makeURI(aor) ?? undefined,
       transportOptions: {
         server: this.wsUrl,
-        // Pass the ws package constructor explicitly so sip.js works in Node.js.
-        // This is the correct approach — avoids globalThis polyfill timing issues.
+        // Pass the ws package constructor explicitly so sip.js works in Node.js
         WebSocketConstructor: WebSocket as unknown as typeof globalThis.WebSocket,
       },
       authorizationUsername: this.sipUsername,
