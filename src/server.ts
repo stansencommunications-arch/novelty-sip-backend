@@ -18,8 +18,7 @@ app.use(express.json());
 
 // Initialize SIP Server
 const sipServer = new SIPServer(
-  process.env.YEASTER_HOST || "192.168.1.250",
-  parseInt(process.env.YEASTER_PORT || "8088"),
+  process.env.YEASTER_WS_URL || "ws://localhost:8089",
   process.env.YEASTER_SIP_USERNAME || "1000",
   process.env.YEASTER_SIP_PASSWORD || "",
   process.env.YEASTER_DOMAIN || "192.168.1.250"
@@ -44,14 +43,13 @@ app.get("/api/sip/status", (req: Request, res: Response) => {
 // ===== MAKE CALL =====
 app.post("/api/calls/make", async (req: Request, res: Response) => {
   const { toNumber } = req.body;
-
   if (!toNumber) {
     return res.status(400).json({ error: "toNumber required" });
   }
-
   const callId = uuidv4();
-  const result = await sipServer.makeCall(toNumber, callId);
-
+  const result = await sipServer.makeCall(toNumber, callId, (cId, state) => {
+    console.log(`[API] Call ${cId} → ${state}`);
+  });
   if (result.success) {
     callMap.set(callId, {
       startTime: new Date(),
@@ -66,11 +64,9 @@ app.post("/api/calls/make", async (req: Request, res: Response) => {
 // ===== END CALL =====
 app.post("/api/calls/end", async (req: Request, res: Response) => {
   const { callId } = req.body;
-
   if (!callId) {
     return res.status(400).json({ error: "callId required" });
   }
-
   const result = await sipServer.endCall(callId);
   callMap.delete(callId);
   res.json(result);
@@ -80,18 +76,15 @@ app.post("/api/calls/end", async (req: Request, res: Response) => {
 app.get("/api/calls/:callId/status", (req: Request, res: Response) => {
   const { callId } = req.params;
   const status = sipServer.getCallStatus(callId);
-
   if (!status) {
     return res.status(404).json({ error: "Call not found" });
   }
-
   res.json(status);
 });
 
 // ===== START SERVER =====
 app.listen(PORT, async () => {
   console.log(`[Server] 🚀 Novelty SIP Backend started on port ${PORT}`);
-
   try {
     await sipServer.connect();
     console.log("[Server] ✅ Ready for calls");
@@ -107,4 +100,3 @@ process.on("SIGINT", async () => {
 });
 
 export default app;
-
