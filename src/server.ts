@@ -16,9 +16,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Initialize SIP Server with correct 4 parameters
+// Initialize SIP Server with TCP parameters
 const sipServer = new SIPServer(
-  process.env.YEASTER_WS_URL || "ws://localhost:8089",
+  process.env.YEASTER_SIP_SERVER || "192.168.1.250",
+  parseInt(process.env.YEASTER_SIP_PORT || "5060"),
   process.env.YEASTER_SIP_USERNAME || "1000",
   process.env.YEASTER_SIP_PASSWORD || "",
   process.env.YEASTER_DOMAIN || "192.168.1.250"
