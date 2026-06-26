@@ -1,7 +1,7 @@
 // CommonJS output: require() calls run in source order, so this assignment
 // executes before sip.js is required — which is what makes the polyfill safe here.
 import WebSocket from 'ws';
-(globalThis as any).WebSocket = WebSocket;
+(globalThis as Record<string, any>).WebSocket = WebSocket;
 
 import {
   UserAgent,
